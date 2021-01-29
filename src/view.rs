@@ -17,6 +17,16 @@ impl<T> View<T> for &[T] {
     }
 }
 
+impl<T> View<T> for &mut [T] {
+    fn take(&mut self, n: usize) -> Result<&[T], BadPos> {
+        let len = self.len();
+        if n > len { return Err(BadPos) }
+        let out = unsafe { slice::from_raw_parts(self.as_ptr(), n) };
+        *self = unsafe { slice::from_raw_parts_mut(self.as_mut_ptr().add(n), len - n) };
+        Ok(out)
+    }
+}
+
 macro_rules! take_int {
     ($self:ident, $typ:tt::$conv:tt) => {
         {
@@ -176,6 +186,7 @@ pub trait Bytes: View<u8> {
 }
 
 impl Bytes for &[u8] {}
+impl Bytes for &mut [u8] {}
 
 #[cfg(test)]
 mod tests {
