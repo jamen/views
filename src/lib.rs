@@ -1,15 +1,25 @@
-//! Views into a buffer.
+//! Extension to slices for buffers
 //!
-//! See [`View`](./struct.View.html) and [`ViewMut`](./struct.View.html). There's also the aliases [`Bytes`](./struct.Bytes.html) and [`BytesMut`](./struct.BytesMut.html) for byte buffers.
+//! See the traits [`Bytes`](./trait.Bytes.html), [`BytesMut`](./trait.BytesMut.html) (or the generic versions [`View`](./trait.View.html), [`ViewMut`](./trait.View.html)), and the struct [`Look`](./struct.Look.html). This crate is `#![no_std]` and uses `core`, but the `coding` feature can add the [`Decode`](./trait.Decode.html) and [`Encode`](./trait.Encode.html) traits for `std::io`.
 //!
-//! This is mostly inspired from [`bytes::Bytes`](https://docs.rs/bytes/1.0.1/bytes/struct.Bytes.html). Some notable dfferences with this crate are the buffer and element types are generic, there is bounds checking, and no dynamic dispatch.
+//! See also [`bytes`](https://docs.rs/bytes), [`byteorder`](https://docs.rs/byteorder), and [`nom`](https://docs.rs/nom).
 
-/// An error for an out of bounds operation.
+#![no_std]
+
+extern crate core;
+
+/// When an operation goes to a bad position. E.g. out of bounds or invalid UTF8
 #[derive(Debug,PartialEq,Eq)]
-pub struct OutOfBounds;
+pub struct BadPos;
 
+mod look;
 mod view;
 mod view_mut;
+#[cfg(feature="coding")]
+mod coding;
 
+pub use look::*;
 pub use view::*;
 pub use view_mut::*;
+#[cfg(feature="coding")]
+pub use coding::*;

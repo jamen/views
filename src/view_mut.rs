@@ -1,170 +1,547 @@
-use std::ops::{Deref,DerefMut};
-use std::fmt::{self,Debug,Formatter};
-use std::mem;
-use std::sync::Arc;
-use std::marker::PhantomData;
+use core::slice;
 
-use crate::OutOfBounds;
+use crate::BadPos;
 
-pub struct ViewMut<T, B: AsRef<[T]> + AsMut<[T]>> {
-    buf: B,
-    phantom: PhantomData<T>
+pub trait ViewMut<T: Copy>: AsMut<[T]> {
+    fn put(&mut self, val: &[T]) -> Result<(), BadPos>;
 }
 
-pub type BytesMut = ViewMut<u8, Arc<Vec<u8>>>;
-
-impl<T, B: AsRef<[T]> + AsMut<[T]>> AsRef<[T]> for ViewMut<T, B> {
-    fn as_ref(&self) -> &[T] {
-        self.buf.as_ref()
-    }
-}
-
-impl<T, B: AsRef<[T]> + AsMut<[T]>> AsMut<[T]> for ViewMut<T, B> {
-    fn as_mut(&mut self) -> &mut [T] {
-        self.buf.as_mut()
+impl<T: Copy> ViewMut<T> for &mut [T] {
+    fn put(&mut self, val: &[T]) -> Result<(), BadPos> {
+        let n = val.len();
+        let len = self.len();
+        if n > len { return Err(BadPos) }
+        let write = unsafe { slice::from_raw_parts_mut(self.as_mut_ptr(), n) };
+        write.copy_from_slice(val);
+        *self = unsafe { slice::from_raw_parts_mut(self.as_mut_ptr().add(n), len - n) };
+        Ok(())
     }
 }
 
-impl<T, B: AsRef<[T]> + AsMut<[T]>> Deref for ViewMut<T, B> {
-    type Target = [T];
-    fn deref(&self) -> &Self::Target {
-        self.as_ref()
+pub trait BytesMut: ViewMut<u8> {
+    fn put_u8(&mut self, val: u8) -> Result<(), BadPos> {
+        self.put(&[val])
+    }
+
+    fn put_i8(&mut self, val: i8) -> Result<(), BadPos> {
+        self.put(&[val as u8])
+    }
+
+    fn put_u16_le(&mut self, val: u16) -> Result<(), BadPos> {
+        self.put(&u16::to_le_bytes(val))
+    }
+
+    fn put_u16_be(&mut self, val: u16) -> Result<(), BadPos> {
+        self.put(&u16::to_be_bytes(val))
+    }
+
+    fn put_u16_ne(&mut self, val: u16) -> Result<(), BadPos> {
+        self.put(&u16::to_ne_bytes(val))
+    }
+
+    fn put_i16_le(&mut self, val: i16) -> Result<(), BadPos> {
+        self.put(&i16::to_le_bytes(val))
+    }
+
+    fn put_i16_be(&mut self, val: i16) -> Result<(), BadPos> {
+        self.put(&i16::to_be_bytes(val))
+    }
+
+    fn put_i16_ne(&mut self, val: i16) -> Result<(), BadPos> {
+        self.put(&i16::to_ne_bytes(val))
+    }
+
+    fn put_u32_le(&mut self, val: u32) -> Result<(), BadPos> {
+        self.put(&u32::to_le_bytes(val))
+    }
+
+    fn put_u32_be(&mut self, val: u32) -> Result<(), BadPos> {
+        self.put(&u32::to_be_bytes(val))
+    }
+
+    fn put_u32_ne(&mut self, val: u32) -> Result<(), BadPos> {
+        self.put(&u32::to_ne_bytes(val))
+    }
+
+    fn put_i32_le(&mut self, val: i32) -> Result<(), BadPos> {
+        self.put(&i32::to_le_bytes(val))
+    }
+
+    fn put_i32_be(&mut self, val: i32) -> Result<(), BadPos> {
+        self.put(&i32::to_be_bytes(val))
+    }
+
+    fn put_i32_ne(&mut self, val: i32) -> Result<(), BadPos> {
+        self.put(&i32::to_ne_bytes(val))
+    }
+
+    fn put_u64_le(&mut self, val: u64) -> Result<(), BadPos> {
+        self.put(&u64::to_le_bytes(val))
+    }
+
+    fn put_u64_be(&mut self, val: u64) -> Result<(), BadPos> {
+        self.put(&u64::to_be_bytes(val))
+    }
+
+    fn put_u64_ne(&mut self, val: u64) -> Result<(), BadPos> {
+        self.put(&u64::to_ne_bytes(val))
+    }
+
+    fn put_i64_le(&mut self, val: i64) -> Result<(), BadPos> {
+        self.put(&i64::to_le_bytes(val))
+    }
+
+    fn put_i64_be(&mut self, val: i64) -> Result<(), BadPos> {
+        self.put(&i64::to_be_bytes(val))
+    }
+
+    fn put_i64_ne(&mut self, val: i64) -> Result<(), BadPos> {
+        self.put(&i64::to_ne_bytes(val))
+    }
+
+    fn put_u128_le(&mut self, val: u128) -> Result<(), BadPos> {
+        self.put(&u128::to_le_bytes(val))
+    }
+
+    fn put_u128_be(&mut self, val: u128) -> Result<(), BadPos> {
+        self.put(&u128::to_be_bytes(val))
+    }
+
+    fn put_u128_ne(&mut self, val: u128) -> Result<(), BadPos> {
+        self.put(&u128::to_ne_bytes(val))
+    }
+
+    fn put_i128_le(&mut self, val: i128) -> Result<(), BadPos> {
+        self.put(&i128::to_le_bytes(val))
+    }
+
+    fn put_i128_be(&mut self, val: i128) -> Result<(), BadPos> {
+        self.put(&i128::to_be_bytes(val))
+    }
+
+    fn put_i128_ne(&mut self, val: i128) -> Result<(), BadPos> {
+        self.put(&i128::to_ne_bytes(val))
+    }
+
+    fn put_f32_le(&mut self, val: f32) -> Result<(), BadPos> {
+        self.put(&f32::to_le_bytes(val))
+    }
+
+    fn put_f32_be(&mut self, val: f32) -> Result<(), BadPos> {
+        self.put(&f32::to_be_bytes(val))
+    }
+
+    fn put_f32_ne(&mut self, val: f32) -> Result<(), BadPos> {
+        self.put(&f32::to_ne_bytes(val))
+    }
+
+    fn put_f64_le(&mut self, val: f64) -> Result<(), BadPos> {
+        self.put(&f64::to_le_bytes(val))
+    }
+
+    fn put_f64_be(&mut self, val: f64) -> Result<(), BadPos> {
+        self.put(&f64::to_be_bytes(val))
+    }
+
+    fn put_f64_ne(&mut self, val: f64) -> Result<(), BadPos> {
+        self.put(&f64::to_ne_bytes(val))
     }
 }
 
-impl<T, B: AsRef<[T]> + AsMut<[T]>> DerefMut for ViewMut<T, B> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.as_mut()
-    }
-}
+impl BytesMut for &mut [u8] {}
 
-impl<T: Debug, B: AsRef<[T]> + AsMut<[T]>> Debug for ViewMut<T, B> {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), fmt::Error> {
-        self.as_ref().fmt(fmt)
-    }
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{Look,BytesMut};
 
-impl<T, B: AsRef<[T]> + AsMut<[T]>> ViewMut<T, B> {
-    pub fn new(buf: B) -> Self {
-        Self { buf, phantom: PhantomData::default() }
-    }
-}
+    #[test]
+    fn test_put() {
+        let src = &mut [2,0,0,0,b'H',b'i',b'\0'][..];
+        let mut a = Look::new(src);
 
-macro_rules! put_int {
-    ($self:ident, $val:ident, $typ:tt::$conv:tt) => {
-        {
-            const SIZE: usize = mem::size_of::<$typ>();
-            let bytes = $self.as_mut();
-            if bytes.len() < SIZE { return Err(OutOfBounds) }
-            let bytes = bytes.as_mut_ptr() as *mut [u8; SIZE];
-            unsafe { *bytes = $typ::$conv($val); }
-            Ok(())
-        }
-    }
-}
+        let out = a.put(&[]);
+        assert!(out.is_ok());
+        assert!(a.as_ref() == &[2,0,0,0,b'H',b'i',b'\0'][..]);
+        // assert!(src == &[2,0,0,0,b'H',b'i',b'\0'][..]);
 
-impl<B: AsRef<[u8]> + AsMut<[u8]>> ViewMut<u8, B> {
-    pub fn put_u16_le(&mut self, val: u16) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u16::to_le_bytes)
-    }
+        let four = a.put(&[0xFF,0xFF,0xFF,0xFF]);
+        assert!(four.is_ok(), "put 4");
+        assert!(a.as_ref() == &[b'H',b'i',b'\0'][..]);
+        // assert!(src == &[0xFF,0xFF,0xFF,0xFF,b'H',b'i',b'\0'][..]);
 
-    pub fn put_u16_be(&mut self, val: u16) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u16::to_be_bytes)
-    }
+        let four_err = a.put(&[0xFF,0xFF,0xFF,0xFF]);
+        assert!(four_err.is_err(), "put 4 out of bounds");
+        assert!(a.as_ref() == &[b'H',b'i',b'\0'][..]);
+        // assert!(src == &[0xFF,0xFF,0xFF,0xFF,b'H',b'i',b'\0'][..]);
 
-    pub fn put_u16_ne(&mut self, val: u16) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u16::to_ne_bytes)
+        let rest = a.put(&[b'O',b'k',b'\0']);
+        assert!(rest.is_ok(), "put rest");
+        assert!(a.as_ref() == &[]);
+        // assert!(src == &[0xFF,0xFF,0xFF,0xFF,b'O',b'k',b'\0'][..]);
+
+        let one_err = a.put(&[0xFF]);
+        assert!(one_err.is_err(), "put 1 out of bounds");
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+
+        assert!(src == &[0xFF,0xFF,0xFF,0xFF,b'O',b'k',b'\0'][..]);
     }
 
-    pub fn put_i16_le(&mut self, val: i16) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i16::to_le_bytes)
+    #[test]
+    fn test_put_u8() {
+        let src: &mut [u8] = &mut [0,1][..];
+        let mut a = Look::new(src);
+
+        let b = a.put_u8(0xFF);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &[1]);
+
+        let c = a.put_u8(0xFE);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let d = a.put_u8(0xFD);
+        assert!(d.is_err());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[0xFF,0xFE]);
     }
 
-    pub fn put_i16_be(&mut self, val: i16) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i16::to_be_bytes)
+    #[test]
+    fn test_put_i8() {
+        let src: &mut [u8] = &mut [0,1,-1i8 as u8];
+        let mut a = Look::new(src);
+
+        let b = a.put_i8(-1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &[1,-1i8 as u8]);
+
+        let c = a.put_i8(0);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[-1i8 as u8]);
+
+        let d = a.put_i8(1);
+        assert!(d.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let e = a.put_i8(-2);
+        assert!(e.is_err());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[-1i8 as u8,0,1]);
     }
 
-    pub fn put_i16_ne(&mut self, val: i16) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i16::to_ne_bytes)
+    #[test]
+    fn test_put_u16() {
+        let src = &mut [1u16.to_le_bytes(),u16::MAX.to_le_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_u16_le(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &u16::MAX.to_le_bytes()[..]);
+
+        let c = a.put_u16_le(u16::MAX);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1u16.to_le_bytes(),u16::MAX.to_le_bytes()].concat()[..]);
+
+        let src = &mut [1u16.to_be_bytes(),u16::MAX.to_be_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_u16_be(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &u16::MAX.to_be_bytes()[..]);
+
+        let c = a.put_u16_be(u16::MAX);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1u16.to_be_bytes(),u16::MAX.to_be_bytes()].concat()[..]);
     }
 
-    pub fn put_u32_le(&mut self, val: u32) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u32::to_le_bytes)
+    #[test]
+    fn test_put_i16() {
+        let src: &mut [u8] = &mut [1i16.to_le_bytes(),(-1i16).to_le_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_i16_le(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1i16).to_le_bytes()[..]);
+
+        let c = a.put_i16_le(-1);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1i16.to_le_bytes(),(-1i16).to_le_bytes()].concat()[..]);
+
+        let src: &mut [u8] = &mut [1i16.to_be_bytes(),(-1i16).to_be_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_i16_be(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1i16).to_be_bytes()[..]);
+
+        let c = a.put_i16_be(-1);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1i16.to_be_bytes(),(-1i16).to_be_bytes()].concat()[..]);
     }
 
-    pub fn put_u32_be(&mut self, val: u32) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u32::to_be_bytes)
+    #[test]
+    fn test_put_u32() {
+        let src = &mut [1u32.to_le_bytes(),u32::MAX.to_le_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_u32_le(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &u32::MAX.to_le_bytes()[..]);
+
+        let c = a.put_u32_le(u32::MAX);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1u32.to_le_bytes(),u32::MAX.to_le_bytes()].concat()[..]);
+
+        let src = &mut [1u32.to_be_bytes(),u32::MAX.to_be_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_u32_be(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &u32::MAX.to_be_bytes()[..]);
+
+        let c = a.put_u32_be(u32::MAX);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1u32.to_be_bytes(),u32::MAX.to_be_bytes()].concat()[..]);
     }
 
-    pub fn put_u32_ne(&mut self, val: u32) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u32::to_ne_bytes)
+    #[test]
+    fn test_put_i32() {
+        let src: &mut [u8] = &mut [1i32.to_le_bytes(),(-1i32).to_le_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_i32_le(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1i32).to_le_bytes()[..]);
+
+        let c = a.put_i32_le(-1);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1i32.to_le_bytes(),(-1i32).to_le_bytes()].concat()[..]);
+
+        let src: &mut [u8] = &mut [1i32.to_be_bytes(),(-1i32).to_be_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_i32_be(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1i32).to_be_bytes()[..]);
+
+        let c = a.put_i32_be(-1);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1i32.to_be_bytes(),(-1i32).to_be_bytes()].concat()[..]);
     }
 
-    pub fn put_i32_le(&mut self, val: i32) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i32::to_le_bytes)
+    #[test]
+    fn test_put_u64() {
+        let src = &mut [1u64.to_le_bytes(),u64::MAX.to_le_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_u64_le(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &u64::MAX.to_le_bytes()[..]);
+
+        let c = a.put_u64_le(u64::MAX);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1u64.to_le_bytes(),u64::MAX.to_le_bytes()].concat()[..]);
+
+        let src = &mut [1u64.to_be_bytes(),u64::MAX.to_be_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_u64_be(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &u64::MAX.to_be_bytes()[..]);
+
+        let c = a.put_u64_be(u64::MAX);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1u64.to_be_bytes(),u64::MAX.to_be_bytes()].concat()[..]);
     }
 
-    pub fn put_i32_be(&mut self, val: i32) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i32::to_be_bytes)
+    #[test]
+    fn test_put_i64() {
+        let src: &mut [u8] = &mut [1i64.to_le_bytes(),(-1i64).to_le_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_i64_le(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1i64).to_le_bytes()[..]);
+
+        let c = a.put_i64_le(-1);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1i64.to_le_bytes(),(-1i64).to_le_bytes()].concat()[..]);
+
+        let src: &mut [u8] = &mut [1i64.to_be_bytes(),(-1i64).to_be_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_i64_be(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1i64).to_be_bytes()[..]);
+
+        let c = a.put_i64_be(-1);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1i64.to_be_bytes(),(-1i64).to_be_bytes()].concat()[..]);
     }
 
-    pub fn put_i32_ne(&mut self, val: i32) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i32::to_ne_bytes)
+    #[test]
+    fn test_put_u128() {
+        let src = &mut [1u128.to_le_bytes(),u128::MAX.to_le_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_u128_le(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &u128::MAX.to_le_bytes()[..]);
+
+        let c = a.put_u128_le(u128::MAX);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1u128.to_le_bytes(),u128::MAX.to_le_bytes()].concat()[..]);
+
+        let src = &mut [1u128.to_be_bytes(),u128::MAX.to_be_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_u128_be(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &u128::MAX.to_be_bytes()[..]);
+
+        let c = a.put_u128_be(u128::MAX);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1u128.to_be_bytes(),u128::MAX.to_be_bytes()].concat()[..]);
     }
 
-    pub fn put_u64_le(&mut self, val: u64) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u64::to_le_bytes)
+    #[test]
+    fn test_put_i128() {
+        let src: &mut [u8] = &mut [1i128.to_le_bytes(),(-1i128).to_le_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_i128_le(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1i128).to_le_bytes()[..]);
+
+        let c = a.put_i128_le(-1);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1i128.to_le_bytes(),(-1i128).to_le_bytes()].concat()[..]);
+
+        let src: &mut [u8] = &mut [1i128.to_be_bytes(),(-1i128).to_be_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_i128_be(1);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1i128).to_be_bytes()[..]);
+
+        let c = a.put_i128_be(-1);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1i128.to_be_bytes(),(-1i128).to_be_bytes()].concat()[..]);
     }
 
-    pub fn put_u64_be(&mut self, val: u64) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u64::to_be_bytes)
+    #[test]
+    fn test_put_f32() {
+        let src = &mut [1f32.to_le_bytes(),(-1f32).to_le_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_f32_le(1f32);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1f32).to_le_bytes()[..]);
+
+        let c = a.put_f32_le(-1f32);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1f32.to_le_bytes(),(-1f32).to_le_bytes()].concat()[..]);
+
+        let src = &mut [1f32.to_be_bytes(),(-1f32).to_be_bytes()].concat()[..];
+        let mut a = Look::new(src);
+
+        let b = a.put_f32_be(1f32);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1f32).to_be_bytes()[..]);
+
+        let c = a.put_f32_be(-1f32);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
+
+        let src = a.into_inner();
+        assert!(src == &[1f32.to_be_bytes(),(-1f32).to_be_bytes()].concat()[..]);
     }
 
-    pub fn put_u64_ne(&mut self, val: u64) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u64::to_ne_bytes)
-    }
+    #[test]
+    fn test_put_f64() {
+        let src = &mut [1f64.to_le_bytes(),(-1f64).to_le_bytes()].concat()[..];
+        let mut a = Look::new(src);
 
-    pub fn put_i64_le(&mut self, val: i64) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i64::to_le_bytes)
-    }
+        let b = a.put_f64_le(1f64);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1f64).to_le_bytes()[..]);
 
-    pub fn put_i64_be(&mut self, val: i64) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i64::to_be_bytes)
-    }
+        let c = a.put_f64_le(-1f64);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
 
-    pub fn put_i64_ne(&mut self, val: i64) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i64::to_ne_bytes)
-    }
+        let src = a.into_inner();
+        assert!(src == &[1f64.to_le_bytes(),(-1f64).to_le_bytes()].concat()[..]);
 
-    pub fn put_u128_le(&mut self, val: u128) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u128::to_le_bytes)
-    }
+        let src = &mut [1f64.to_be_bytes(),(-1f64).to_be_bytes()].concat()[..];
+        let mut a = Look::new(src);
 
-    pub fn put_u128_be(&mut self, val: u128) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u128::to_be_bytes)
-    }
+        let b = a.put_f64_be(1f64);
+        assert!(b.is_ok());
+        assert!(a.as_ref() == &(-1f64).to_be_bytes()[..]);
 
-    pub fn put_u128_ne(&mut self, val: u128) -> Result<(), OutOfBounds> {
-        put_int!(self, val, u128::to_ne_bytes)
-    }
+        let c = a.put_f64_be(-1f64);
+        assert!(c.is_ok());
+        assert!(a.as_ref() == &[]);
 
-    pub fn put_i128_le(&mut self, val: i128) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i128::to_le_bytes)
-    }
-
-    pub fn put_i128_be(&mut self, val: i128) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i128::to_be_bytes)
-    }
-
-    pub fn put_i128_ne(&mut self, val: i128) -> Result<(), OutOfBounds> {
-        put_int!(self, val, i128::to_ne_bytes)
-    }
-
-    pub fn put_f32_le(&mut self, val: f32) -> Result<(), OutOfBounds> {
-        put_int!(self, val, f32::to_le_bytes)
-    }
-
-    pub fn put_f64_le(&mut self, val: f64) -> Result<(), OutOfBounds> {
-        put_int!(self, val, f64::to_le_bytes)
+        let src = a.into_inner();
+        assert!(src == &[1f64.to_be_bytes(),(-1f64).to_be_bytes()].concat()[..]);
     }
 }

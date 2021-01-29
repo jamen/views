@@ -1,11 +1,14 @@
 [package]
 name = "views"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Jamen Marz <me@jamen.dev>"]
 edition = "2018"
-description = "Views into a buffer."
+description = "Extension to slices for buffers"
 license = "Zlib"
 readme = "readme.md"
 homepage = "https://github.com/jamen/views"
 repository = "https://github.com/jamen/views"
 docmentation = "https://docs.rs/views"
+
+[features]
+coding = []
