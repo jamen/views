@@ -1,6 +1,6 @@
 [package]
 name = "views"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Jamen Marz <me@jamen.dev>"]
 edition = "2018"
 description = "Extension to slices for buffers"
